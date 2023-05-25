@@ -53,7 +53,7 @@ class Process_Page extends Admin_Page
 
     public function add_admin_page()
     {
-?>
+        ?>
         <div class="wrap">
             <h2><?= $this->name ?></h2>
             <div>
@@ -87,7 +87,7 @@ class Process_Page extends Admin_Page
                 }
             } ?>
         </div>
-    <?php
+        <?php
 
     }
 
@@ -104,7 +104,7 @@ class Process_Page extends Admin_Page
         ));
         wp_localize_script("import-processparts", "all_processparts", $product_ids);
 
-    ?>
+        ?>
         <p>Всего задачь <strong id="resce-allEmails"><?= count($product_ids) ?></strong></p>
         <div class="progress-wrap progress" data-progress-percent="0">
             <div class="progress-bar progress"></div>
@@ -114,7 +114,7 @@ class Process_Page extends Admin_Page
         <div><br>
             <pre id="resce-error"></pre>
         </div>
-<?php
+        <?php
     }
 
     public function process_is_finish()
@@ -184,18 +184,21 @@ class Process_Page extends Admin_Page
                     if ($atach_id) {
                         $pdf_ids[] = $atach_id;
                     } else {
-						$title .= " - upload false ({$remote_file}) ";
+                        $title .= " - upload false ({$remote_file}) ";
                         // error_log($id . ' ' . $title . ' - error upload ' . $remote_file);
                     }
                 }
                 //Пишем в Acf repeater поле documentation
                 // error_log($id . ' ' . $title . ' uploaded ' . print_r($pdf_ids, true));
                 if (!empty($pdf_ids)) {
+
+                    delete_field('documentation', $id);
                     //Указываем количество
-                    update_post_meta($id, 'documentation', count($pdf_ids));
+//                    update_post_meta($id, 'documentation', count($pdf_ids));
                     //И далее сами поля заполняем
                     foreach ($pdf_ids as $key => $file_id) {
-                        update_post_meta($id, 'documentation_' . $key . '_file', $file_id);
+                        add_row('documentation', ['file' => $file_id], $id);
+//                        update_post_meta($id, 'documentation_' . $key . '_file', $file_id);
                     }
                 }
             }
@@ -209,7 +212,7 @@ class Process_Page extends Admin_Page
     }
 
 
-    protected  function rudr_upload_file_by_url($image_url)
+    protected function rudr_upload_file_by_url($image_url)
     {
 
         // it allows us to use download_url() and wp_handle_sideload() functions
@@ -224,15 +227,15 @@ class Process_Page extends Admin_Page
 
         // move the temp file into the uploads directory
         $file = array(
-            'name'     => basename($image_url),
-            'type'     => mime_content_type($temp_file),
+            'name' => basename($image_url),
+            'type' => mime_content_type($temp_file),
             'tmp_name' => $temp_file,
-            'size'     => filesize($temp_file),
+            'size' => filesize($temp_file),
         );
         $sideload = wp_handle_sideload(
             $file,
             array(
-                'test_form'   => false // no needs to check 'action' parameter
+                'test_form' => false // no needs to check 'action' parameter
             )
         );
 
@@ -244,11 +247,11 @@ class Process_Page extends Admin_Page
         // it is time to add our uploaded image into WordPress media library
         $attachment_id = wp_insert_attachment(
             array(
-                'guid'           => $sideload['url'],
+                'guid' => $sideload['url'],
                 'post_mime_type' => $sideload['type'],
-                'post_title'     => basename($sideload['file']),
-                'post_content'   => '',
-                'post_status'    => 'inherit',
+                'post_title' => basename($sideload['file']),
+                'post_content' => '',
+                'post_status' => 'inherit',
             ),
             $sideload['file']
         );
